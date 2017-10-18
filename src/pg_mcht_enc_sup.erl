@@ -20,7 +20,7 @@
 %%====================================================================
 
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+  supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -28,7 +28,9 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+  RestartStrategy = xfutils:sup_restart_strategy(),
+  Enc = xfutils:child_spec(pg_mcht_enc),
+  {ok, {RestartStrategy, [Enc]}}.
 
 %%====================================================================
 %% Internal functions
