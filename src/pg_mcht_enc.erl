@@ -487,5 +487,48 @@ write_mcht_req_pk(PrivDir, StrMchtId, ReqPK, Option) ->
   lager:info("Write req pem file success !", []).
 
 %%%===================================================================
+digest_test() ->
+  A = <<"accNo=6225682141000002950&accessType=0&backUrl=https://101.231.204.80:5000/gateway/api/backTransReq.do&bizType=000201&certId=124876885185794726986301355951670452718&channelType=07&currencyCode=156&encoding=UTF-8&merId=898340183980105&orderId=2014110600007615&signMethod=01&txnAmt=000000010000&txnSubType=01&txnTime=20150109135921&txnType=01&version=5.0.0">>,
+
+  ?assertEqual(<<"c527432e8f632d555c651eaf8e5e0b027405fa46">>, digest(A)),
+  ok.
 
 
+mcht_1_pk_pair() ->
+  MchtKeysDir = xfutils:get_path(?APP, [home, priv_dir, keys_dir]),
+  L = mcht_all_keys([MchtKeysDir, "/1"], "1"),
+
+  [{{1, req}, {{PrivateKey, _}, {PublicKey, _}}}, _] = L,
+  {PrivateKey, PublicKey}.
+
+sign_verify_test_1() ->
+  {PrivateKey, PublicKey} = mcht_1_pk_pair(),
+
+  String = <<"Hello world">>,
+
+  %% enc test
+  Encrypted = public_key:encrypt_private(String, PrivateKey),
+  Decrypted = public_key:decrypt_public(Encrypted, PublicKey),
+
+  ?assertEqual(String, Decrypted),
+
+  % sign/verify test
+  DigestUpper = xfutils:bin_to_hex(crypto:hash(sha, String)),
+  Digest = list_to_binary(string:to_lower(binary_to_list(DigestUpper))),
+  Signed = public_key:sign(Digest, sha, PrivateKey),
+  lager:info("Signed = ~p~n,Digest = ~p", [Signed, Digest]),
+
+  ?assertEqual(true, public_key:verify(Digest, sha, Signed, PublicKey)),
+  ok.
+
+
+verify_hex_test_1() ->
+  {PrivateKey, PublicKey} = mcht_1_pk_pair(),
+
+  Sign = <<"0000120160420201604202006143765380572006141{pI=test,aI=03429500040006212,aN=上海聚孚金融信息服务有限公司,aB=农业银行上海张江集电港支行}1003http://localhost:8888/pg/simu_mcht_back_succ_infohttp://localhost:8888/pg/simu_mcht_front_succ"/utf8>>,
+  %Sig = <<"A5C0ECB6F4F40CE07DD6519521658F5DAD2136761FFB42F6CC475BD797824B21D2FEB1FE97AEC59963D84F31C84D1A0F20BB77E7C498954711084493635BBFB4B40BDC200327188DF1610A88082CEBF0F763ACCB942976F223C50488A80F644B6ADA41826DB448611DB6E7663011C168FE6B46444AEF21BB42F79240063FD6786AF3E490100DF6A70E11B6856F97B861BA99A9C6328A9C64D526733268D5C725A694EDC4142C2926FCEFB425FBA1D39B11EF7132DB80D6B6244894F25B8B3EFC3A862DED998F75187B2304E7DB56D2037215721EBDCC0528ED949A924359759B2E29CB78BAADE3771839D5F1460F82DBCC65F98FD8DC16EAD25482DD9A5EB069">>,
+  Sig = sign_hex(Sign, PrivateKey),
+  R = verify_hex(Sign, Sig, PublicKey),
+
+  ?assertEqual(true, R),
+  ok.
