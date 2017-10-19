@@ -132,7 +132,7 @@ init([]) ->
 
 load_mcht_keys() ->
   %% 定位商户秘钥所在目录
-  PrivDir = mcht_keys_dir(),
+  PrivDir = mcht_keys_priv_dir(),
 
   %% 处理目录下所有的商户
   Keys = [mcht_all_keys([PrivDir, Dir], Dir)
@@ -143,8 +143,12 @@ load_mcht_keys() ->
   KeysDict.
 
 
-mcht_keys_dir() ->
-  xfutils:get_path([home, priv_dir, keys_dir]).
+mcht_keys_priv_dir() ->
+  {ok, KeyDirValue} = application:get_env(?APP, keys_dir),
+  Dir = xfutils:get_path(?APP, KeyDirValue),
+  lager:info("KeyDir = ~ts", [Dir]),
+  Dir.
+
 
 mcht_dirs(Dir) ->
   {ok, MchtDirList} = file:list_dir_all(Dir),
@@ -323,7 +327,7 @@ handle_call({verify, MchtId, Direction, DigestBin, Signature64},
   Verified = verify_internal(DigestBin, Signature64, PublicKey),
   {reply, Verified, State};
 handle_call({save_mcht_pk_file, MchtId, ReqPK, Option}, _From, State) when is_atom(Option) ->
-  PrivDir = mcht_keys_dir(),
+  PrivDir = mcht_keys_priv_dir(),
   StrMchtId = integer_to_binary(MchtId),
   %% copy from mcht 0
   copy_keys_dir_from_mcht_0(MchtId, PrivDir),
@@ -495,7 +499,7 @@ digest_test() ->
 
 
 mcht_1_pk_pair() ->
-  MchtKeysDir = xfutils:get_path(?APP, [home, priv_dir, keys_dir]),
+  MchtKeysDir = mcht_keys_priv_dir(),
   L = mcht_all_keys([MchtKeysDir, "/1"], "1"),
 
   [{{1, req}, {{PrivateKey, _}, {PublicKey, _}}}, _] = L,

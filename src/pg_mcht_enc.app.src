@@ -12,7 +12,8 @@
       ]},
     {env, [
       {priv_dir, "/priv"}
-      , {keys_dir, "/keys/mcht"}
+      , {keys_dir_sub, "/keys/"}
+      , {keys_dir, [priv, keys_dir_sub]}
     ]},
     {modules, [
       pg_mcht_enc_app
