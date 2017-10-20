@@ -41,7 +41,7 @@
   code_change/3]).
 
 -define(SERVER, ?MODULE).
-%%-define(APP, pg_mcht_enc).
+-define(APP, pg_mcht_enc).
 
 -record(state, {mcht_keys}).
 
@@ -141,8 +141,19 @@ load_mcht_keys() ->
 
 mcht_keys_priv_dir() ->
 %%  {ok, KeyDirValue} = application:get_env(?APP, keys_dir),
-  {ok, KeyDirValue} = application:get_env(keys_dir),
-  Dir = xfutils:get_path(KeyDirValue),
+
+%%  lager:error("Application=~p", [application:get_application()]),
+  Dir =
+    case application:get_env(keys_dir) of
+      undefined ->
+        %% called from UT
+        %% no application context
+        {ok, KeysDirValue} = application:get_env(?APP, keys_dir),
+        xfutils:get_path(?APP, KeysDirValue);
+      {ok, ValueInApp} ->
+        {ok, KeysDirValue} = application:get_env(keys_dir),
+        xfutils:get_path(KeysDirValue)
+    end,
   lager:info("KeyDir = ~ts", [Dir]),
   Dir.
 

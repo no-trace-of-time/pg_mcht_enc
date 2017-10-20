@@ -15,7 +15,9 @@
 
 setup() ->
   lager:start(),
-  pg_mcht_enc:start().
+%%  pg_mcht_enc:start().
+  ok = application:start(pg_mcht_enc),
+  ok.
 
 my_test_() ->
   {
