@@ -41,7 +41,7 @@
   code_change/3]).
 
 -define(SERVER, ?MODULE).
--define(APP, pg_mcht_enc).
+%%-define(APP, pg_mcht_enc).
 
 -record(state, {mcht_keys}).
 
@@ -51,13 +51,10 @@
 %%% API
 %%%===================================================================
 start() ->
-  [application:start(App) || App <- apps()].
-
+  ok.
 stop() ->
-  [application:stop(App) || App <- apps()].
+  ok.
 
-apps() ->
-  [?APP].
 %%--------------------------------------------------------------------
 %% @doc
 %% Starts the server
@@ -127,8 +124,7 @@ reload_keys() ->
   {stop, Reason :: term()} | ignore).
 init([]) ->
   %% 读取商户的相关秘钥
-  Dict = load_mcht_keys(),
-  {ok, #state{mcht_keys = Dict}}.
+  {ok, #state{}, 0}.
 
 load_mcht_keys() ->
   %% 定位商户秘钥所在目录
@@ -144,8 +140,9 @@ load_mcht_keys() ->
 
 
 mcht_keys_priv_dir() ->
-  {ok, KeyDirValue} = application:get_env(?APP, keys_dir),
-  Dir = xfutils:get_path(?APP, KeyDirValue),
+%%  {ok, KeyDirValue} = application:get_env(?APP, keys_dir),
+  {ok, KeyDirValue} = application:get_env(keys_dir),
+  Dir = xfutils:get_path(KeyDirValue),
   lager:info("KeyDir = ~ts", [Dir]),
   Dir.
 
@@ -387,6 +384,9 @@ handle_cast(_Request, State) ->
   {noreply, NewState :: #state{}} |
   {noreply, NewState :: #state{}, timeout() | hibernate} |
   {stop, Reason :: term(), NewState :: #state{}}).
+handle_info(timeout, State) ->
+  Dict = load_mcht_keys(),
+  {noreply, #state{mcht_keys = Dict}};
 handle_info(_Info, State) ->
   {noreply, State}.
 
