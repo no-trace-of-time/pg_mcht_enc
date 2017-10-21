@@ -66,19 +66,29 @@ stop() ->
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+public_key_file(MchtId, Direction) when is_binary(MchtId) ->
+  public_key_file(binary_to_integer(MchtId), Direction);
 public_key_file(MchtId, Direction) ->
   gen_server:call(?SERVER, {public_key_file, MchtId, Direction}).
 
+private_key(MchtId, Direction) when is_binary(MchtId) ->
+  private_key(binary_to_integer(MchtId), Direction);
 private_key(MchtId, Direction) ->
   gen_server:call(?SERVER, {private_key, MchtId, Direction}).
 
+sign(MchtId, Direction, SignString) when is_binary(MchtId) ->
+  sign(binary_to_integer(MchtId), Direction, SignString);
 sign(MchtId, Direction, SignString) ->
   gen_server:call(?SERVER, {sign, MchtId, Direction, SignString}).
 
 
+verify(MchtId, Direction, DigestBin, SignString) when is_binary(MchtId) ->
+  verify(binary_to_integer(MchtId), Direction, DigestBin, SignString);
 verify(MchtId, Direction, DigestBin, SignString) ->
   gen_server:call(?SERVER, {verify, MchtId, Direction, DigestBin, SignString}).
 
+sign_hex(MchtId, Direction, SignString) when is_binary(MchtId) ->
+  sign_hex(binary_to_integer(MchtId), Direction, SignString);
 sign_hex(MchtId, Direction, SignString) ->
   gen_server:call(?SERVER, {sign_hex, MchtId, Direction, SignString}).
 
