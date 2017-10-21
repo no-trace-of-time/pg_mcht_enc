@@ -83,6 +83,8 @@ sign_hex(MchtId, Direction, SignString) ->
   gen_server:call(?SERVER, {sign_hex, MchtId, Direction, SignString}).
 
 
+verify_hex(MchtId, Direction, DigestBin, SignString) when is_binary(MchtId) ->
+  verify_hex(binary_to_integer(MchtId), Direction, DigestBin, SignString);
 verify_hex(MchtId, Direction, DigestBin, SignString) when
   is_integer(MchtId),
   is_binary(DigestBin),
@@ -90,11 +92,15 @@ verify_hex(MchtId, Direction, DigestBin, SignString) when
   is_atom(Direction) ->
   gen_server:call(?SERVER, {verify_hex, MchtId, Direction, DigestBin, SignString}).
 
+save_mcht_pk_file(MchtId, ReqPK) when is_binary(MchtId) ->
+  save_mcht_pk_file(binary_to_integer(MchtId), ReqPK);
 save_mcht_pk_file(MchtId, ReqPK) when
   (is_integer(MchtId) and MchtId =/= 0),
   is_binary(ReqPK) ->
   gen_server:call(?SERVER, {save_mcht_pk_file, MchtId, ReqPK, rsa_key}).
 
+save_mcht_req_pk_file_raw(MchtId, ReqPK) when is_binary(MchtId) ->
+  save_mcht_req_pk_file_raw(binary_to_integer(MchtId), ReqPK);
 save_mcht_req_pk_file_raw(MchtId, ReqPK) when
   is_integer(MchtId),
   is_binary(ReqPK) ->
