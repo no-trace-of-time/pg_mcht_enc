@@ -450,24 +450,32 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+get_private_key_from_state(MchtId, Direction, Dict) when is_binary(MchtId) ->
+  get_private_key_from_state(binary_to_integer(MchtId), Direction, Dict);
 get_private_key_from_state(MchtId, Direction, Dict)
   when is_integer(MchtId), is_atom(Direction),
   ((Direction =:= resp) or (Direction =:= req)) ->
   {{PrivateKey, _PrivateKeyFile}, _} = fetch_from_state({MchtId, Direction}, Dict),
   PrivateKey.
 
+get_private_key_file_from_state(MchtId, Direction, Dict) when is_binary(MchtId) ->
+  get_private_key_file_from_state(binary_to_integer(MchtId), Direction, Dict);
 get_private_key_file_from_state(MchtId, Direction, Dict)
   when is_integer(MchtId), is_atom(Direction),
   ((Direction =:= resp) or (Direction =:= req)) ->
   {{_PrivateKey, PrivateKeyFile}, _} = fetch_from_state({MchtId, Direction}, Dict),
   PrivateKeyFile.
 
+get_public_key_from_state(MchtId, Direction, Dict) when is_binary(MchtId) ->
+  get_public_key_from_state(binary_to_integer(MchtId), Direction, Dict);
 get_public_key_from_state(MchtId, Direction, Dict)
   when is_integer(MchtId), is_atom(Direction),
   ((Direction =:= resp) or (Direction =:= req)) ->
   {_, {PublicKey, _PublicKeyFile}} = fetch_from_state({MchtId, Direction}, Dict),
   PublicKey.
 
+get_public_key_file_from_state(MchtId, Direction, Dict) when is_binary(MchtId) ->
+  get_public_key_file_from_state(binary_to_integer(MchtId), Direction, Dict);
 get_public_key_file_from_state(MchtId, Direction, Dict)
   when is_integer(MchtId), is_atom(Direction),
   ((Direction =:= resp) or (Direction =:= req)) ->
