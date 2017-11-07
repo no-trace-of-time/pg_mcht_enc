@@ -89,7 +89,8 @@ verify(MchtId, Direction, DigestBin, SignString) ->
 
 sign_hex(MchtId, Direction, SignString) when is_binary(MchtId) ->
   sign_hex(binary_to_integer(MchtId), Direction, SignString);
-sign_hex(MchtId, Direction, SignString) ->
+sign_hex(MchtId, Direction, SignString)
+  when is_integer(MchtId), is_atom(Direction), is_binary(SignString) ->
   gen_server:call(?SERVER, {sign_hex, MchtId, Direction, SignString}).
 
 
