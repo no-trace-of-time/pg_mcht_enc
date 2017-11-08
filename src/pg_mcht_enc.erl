@@ -223,6 +223,7 @@ sign64(DigestBin, PrivateKey) ->
 verify_internal(DigestBin, Signature64, PublicKey) ->
   Digested = digest(DigestBin),
   Signature = base64:decode(Signature64),
+  lager:debug("Before verify, Digested = ~p,Sig = ~p,PublicKey = ~p", [Digested, Signature, PublicKey]),
   public_key:verify(Digested, sha, Signature, PublicKey).
 
 verify_internal_nodigest(DigestBin, Signature64, PublicKey) ->
